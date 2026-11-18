@@ -1,0 +1,16 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets (kabhi GitHub par nahi jana chahiye)
+.env
+
+# Editor / OS
+.vscode/
+.DS_Store
+
+# Flutter / build files
+build/
+.dart_tool/
