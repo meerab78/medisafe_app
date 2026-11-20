@@ -80,3 +80,14 @@ def commit(db: Session):
 
 def rollback(db: Session):
     db.rollback()
+
+def get_overdue_pending_doses(db: Session, cutoff, limit: int):
+    # Pending doses whose time is before the cutoff, for active medications only
+    query = select(DoseLog).select_from(DoseLog)
+    query = query.join(Medication, DoseLog.medication_id == Medication.id)
+    query = query.where(DoseLog.status == "pending")
+    query = query.where(DoseLog.scheduled_at <= cutoff)
+    query = query.where(Medication.is_active.is_(True))
+    query = query.order_by(DoseLog.scheduled_at)
+    query = query.limit(limit)
+    return list(db.scalars(query).all())
