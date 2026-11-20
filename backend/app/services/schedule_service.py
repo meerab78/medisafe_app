@@ -3,13 +3,14 @@ from sqlalchemy.orm import Session
 
 from app.models.schedule_model import Schedule, ScheduleTime
 from app.models.user_model import User
-from app.repositories import schedule_repository
+from app.repositories import dose_repository, schedule_repository
 from app.schemas.schedule_schema import (
     ScheduleCreate,
     ScheduleResponse,
     ScheduleTimeResponse,
 )
 from app.services import medication_service
+from app.utils.timezone_util import get_today_for_timezone
 
 
 def days_list_to_text(days):
@@ -104,6 +105,11 @@ def update_schedule(
     medication = medication_service.get_medication(db, user, medication_id)
     schedule = get_schedule_or_404(db, medication.id)
 
+    # Today's and future pending doses belong to the old schedule, so remove them.
+    # Taken and skipped doses stay as history.
+    today = get_today_for_timezone(user.timezone)
+    dose_repository.delete_pending_doses(db, medication.id, today)
+
     schedule.schedule_type = data.schedule_type
     schedule.days_of_week = days_list_to_text(data.days_of_week)
     schedule.interval_days = data.interval_days
@@ -119,6 +125,10 @@ def update_schedule(
 def delete_schedule(db: Session, user: User, medication_id: int):
     medication = medication_service.get_medication(db, user, medication_id)
     schedule = get_schedule_or_404(db, medication.id)
+
+    # Remove today's and future pending doses of this schedule
+    today = get_today_for_timezone(user.timezone)
+    dose_repository.delete_pending_doses(db, medication.id, today)
 
     # Delete the times first, then the schedule itself
     schedule_repository.delete_times_by_schedule(db, schedule.id)
