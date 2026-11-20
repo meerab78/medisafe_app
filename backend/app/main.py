@@ -11,6 +11,7 @@ from app.routes import (
     schedule_routes,
     user_routes,
 )
+from app.routes import report_routes
 
 app = FastAPI(title="Medisafe API", version="0.1.0")
 
@@ -24,6 +25,7 @@ app.include_router(schedule_routes.router)
 app.include_router(dose_routes.router)
 app.include_router(device_routes.router)
 app.include_router(internal_routes.router)
+app.include_router(report_routes.router)
 
 
 @app.get("/")
