@@ -25,3 +25,16 @@ def save_device(db: Session, device: DeviceToken):
 def delete_device(db: Session, device: DeviceToken):
     db.delete(device)
     db.commit()
+
+def list_fcm_tokens_for_user(db: Session, user_id: int) -> list[str]:
+    tokens = db.scalars(
+        select(DeviceToken.fcm_token).where(DeviceToken.user_id == user_id)
+    )
+    return list(tokens)
+
+
+def remove_fcm_token(db: Session, fcm_token: str) -> None:
+    device = db.scalar(select(DeviceToken).where(DeviceToken.fcm_token == fcm_token))
+    if device is not None:
+        db.delete(device)
+        db.commit()

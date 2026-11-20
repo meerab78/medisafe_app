@@ -14,3 +14,7 @@ __pycache__/
 # Flutter / build files
 build/
 .dart_tool/
+
+# Firebase service account key (secret)
+backend/secrets/
+*service-account*.json
