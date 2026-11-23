@@ -35,3 +35,7 @@ class WizardStep(BaseModel):
 class MedicationWizardResponse(BaseModel):
     version: int
     steps: list[WizardStep]
+
+class AppointmentWizardResponse(BaseModel):
+    version: int
+    steps: list[WizardStep]

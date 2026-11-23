@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.core.exception_handlers import register_exception_handlers
 from app.routes import (
     auth_routes,
+    appointment_routes,
     device_routes,
     dose_routes,
     health_routes,
@@ -30,6 +31,7 @@ app.include_router(internal_routes.router)
 app.include_router(report_routes.router)
 app.include_router(options_routes.router)
 app.include_router(medication_wizard_routes.router)
+app.include_router(appointment_routes.router)
 
 
 @app.get("/")

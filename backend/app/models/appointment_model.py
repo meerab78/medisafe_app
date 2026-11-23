@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
@@ -19,4 +19,6 @@ class Appointment(Base):
     appointment_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), index=True
     )
-    remind_before_minutes: Mapped[int] = mapped_column(default=60)
+    # Minutes before the appointment. None means no reminder.
+    remind_before_minutes: Mapped[int | None]
+    notes: Mapped[str | None] = mapped_column(Text)

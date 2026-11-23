@@ -1,5 +1,8 @@
-from app.core import medication_options
-from app.schemas.options_schema import MedicationWizardResponse
+from app.core import appointment_options, medication_options
+from app.schemas.options_schema import (
+    AppointmentWizardResponse,
+    MedicationWizardResponse,
+)
 
 # Increase this number whenever the wizard changes, so the app knows to refresh
 WIZARD_VERSION = 1
@@ -248,3 +251,86 @@ def build_medication_wizard():
     )
 
     return MedicationWizardResponse(version=WIZARD_VERSION, steps=steps)
+
+APPOINTMENT_WIZARD_VERSION = 1
+
+
+def build_appointment_wizard():
+    steps = []
+
+    # ---------------- Main steps ----------------
+
+    steps.append(
+        {
+            "id": "title",
+            "field": "title",
+            "type": "text",
+            "section": "main",
+            "title": "What is the name of the appointment?",
+            "hint": "Example: Dentist visit",
+            "required": True,
+        }
+    )
+
+    steps.append(
+        {
+            "id": "appointment_at",
+            "field": "appointment_at",
+            "type": "datetime",
+            "section": "main",
+            "title": "What is the date and time of the appointment?",
+            "hint": "Send the time in the user's own timezone, for example 2026-12-05T16:30:00",
+            "required": True,
+        }
+    )
+
+    steps.append(
+        {
+            "id": "remind_before_minutes",
+            "field": "remind_before_minutes",
+            "type": "single_choice",
+            "section": "main",
+            "title": "When would you like to be reminded?",
+            "required": False,
+            "default": 60,
+            "options": appointment_options.APPOINTMENT_REMINDERS,
+        }
+    )
+
+    # ---------------- Extra (optional) settings ----------------
+
+    steps.append(
+        {
+            "id": "doctor_name",
+            "field": "doctor_name",
+            "type": "text",
+            "section": "extras",
+            "title": "Doctor's name",
+            "required": False,
+        }
+    )
+
+    steps.append(
+        {
+            "id": "location",
+            "field": "location",
+            "type": "text",
+            "section": "extras",
+            "title": "Where is it?",
+            "required": False,
+        }
+    )
+
+    steps.append(
+        {
+            "id": "notes",
+            "field": "notes",
+            "type": "text",
+            "section": "extras",
+            "title": "Add a note",
+            "hint": "Example: Bring old reports",
+            "required": False,
+        }
+    )
+
+    return AppointmentWizardResponse(version=APPOINTMENT_WIZARD_VERSION, steps=steps)
