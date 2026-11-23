@@ -134,7 +134,47 @@ def get_today(db: Session, user: User):
     )
 
 
+def reduce_stock(medication, dose_amount):
+    new_stock = medication.stock_quantity - dose_amount
+    # Stock never goes below zero
+    if new_stock < 0:
+        new_stock = 0
+    medication.stock_quantity = new_stock
+
+
 def mark_dose(db: Session, user: User, dose_id: int, new_status: str):
+    dose = dose_repository.get_dose_by_id(db, dose_id, user.id)
+    if dose is None:
+        raise HTTPException(status_code=404, detail="Dose not found")
+
+    if dose.status == "taken" or dose.status == "skipped":
+        raise HTTPException(
+            status_code=400,
+            detail="This dose is already marked as " + dose.status,
+        )
+
+    medication = medication_repository.get_medication_by_id(
+        db, dose.medication_id, user.id
+    )
+    schedule_time = None
+    if dose.schedule_time_id is not None:
+        schedule_time = dose_repository.get_schedule_time_by_id(
+            db, dose.schedule_time_id
+        )
+
+    dose.status = new_status
+    if new_status == "taken":
+        dose.taken_at = datetime.now(timezone.utc)
+
+        # A taken dose uses up tablets. This is saved together with the dose.
+        dose_amount = 1
+        if schedule_time is not None:
+            dose_amount = schedule_time.dose_amount
+        reduce_stock(medication, dose_amount)
+
+    dose = dose_repository.save_dose(db, dose)
+
+    return make_dose_response(dose, medication, schedule_time)
     dose = dose_repository.get_dose_by_id(db, dose_id, user.id)
     if dose is None:
         raise HTTPException(status_code=404, detail="Dose not found")
