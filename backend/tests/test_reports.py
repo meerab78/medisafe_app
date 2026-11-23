@@ -33,7 +33,7 @@ def add_medication(db, user_id, name="Metformin"):
         user_id=user_id,
         name=name,
         dosage="500 mg",
-        medication_type="tablet",
+        medication_type="pill",
         start_date=date(2026, 1, 1),
     )
     db.add(medication)

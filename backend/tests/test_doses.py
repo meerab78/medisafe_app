@@ -40,7 +40,7 @@ def add_medication(client, headers, start_date=None, end_date=None):
     body = {
         "name": "Paracetamol",
         "dosage": "500 mg",
-        "medication_type": "tablet",
+        "medication_type": "pill",
         "start_date": start_date.isoformat(),
     }
     if end_date is not None:

@@ -13,6 +13,10 @@ def create_medication(db: Session, user: User, data: MedicationCreate):
         name=data.name,
         dosage=data.dosage,
         medication_type=data.medication_type,
+        route=data.route,
+        reason=data.reason,
+        icon=data.icon,
+        food_instruction=data.food_instruction,
         instructions=data.instructions,
         start_date=data.start_date,
         end_date=data.end_date,
@@ -56,6 +60,10 @@ def update_medication(
     medication.name = data.name
     medication.dosage = data.dosage
     medication.medication_type = data.medication_type
+    medication.route = data.route
+    medication.reason = data.reason
+    medication.icon = data.icon
+    medication.food_instruction = data.food_instruction
     medication.instructions = data.instructions
     medication.start_date = data.start_date
     medication.end_date = data.end_date

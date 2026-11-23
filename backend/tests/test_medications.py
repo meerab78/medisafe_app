@@ -29,7 +29,7 @@ def get_other_user_headers(client):
     return get_headers_for(client, "other@example.com")
 
 
-def make_medication_body(name="Paracetamol", medication_type="tablet"):
+def make_medication_body(name="Paracetamol", medication_type="pill"):
     # Returns a fresh dictionary each time, so tests do not affect each other
     body = {
         "name": name,
@@ -44,7 +44,7 @@ def make_medication_body(name="Paracetamol", medication_type="tablet"):
     return body
 
 
-def add_medication(client, headers, name="Paracetamol", medication_type="tablet"):
+def add_medication(client, headers, name="Paracetamol", medication_type="pill"):
     body = make_medication_body(name, medication_type)
     return client.post(MEDICATIONS_URL, json=body, headers=headers)
 
@@ -66,7 +66,7 @@ def test_create_medication_success(client):
 
 def test_create_medication_invalid_type_fails(client):
     headers = get_auth_headers(client)
-    response = add_medication(client, headers, medication_type="pill")
+    response = add_medication(client, headers, medication_type="gummy")
     body = response.json()
 
     assert response.status_code == 422
@@ -118,7 +118,7 @@ def test_create_medication_without_token_fails(client):
 def test_list_medications_returns_active_sorted_by_name(client):
     headers = get_auth_headers(client)
     add_medication(client, headers, name="Paracetamol")
-    add_medication(client, headers, name="Amoxicillin", medication_type="capsule")
+    add_medication(client, headers, name="Amoxicillin", medication_type="pill")
 
     response = client.get(MEDICATIONS_URL, headers=headers)
     body = response.json()
@@ -133,7 +133,7 @@ def test_list_medications_returns_active_sorted_by_name(client):
 def test_list_medications_search_by_name(client):
     headers = get_auth_headers(client)
     add_medication(client, headers, name="Paracetamol")
-    add_medication(client, headers, name="Amoxicillin", medication_type="capsule")
+    add_medication(client, headers, name="Amoxicillin", medication_type="pill")
 
     response = client.get(MEDICATIONS_URL, params={"search": "para"}, headers=headers)
     body = response.json()
@@ -144,11 +144,11 @@ def test_list_medications_search_by_name(client):
 
 def test_list_medications_filter_by_type(client):
     headers = get_auth_headers(client)
-    add_medication(client, headers, name="Paracetamol", medication_type="tablet")
-    add_medication(client, headers, name="Cough Syrup", medication_type="syrup")
+    add_medication(client, headers, name="Paracetamol", medication_type="pill")
+    add_medication(client, headers, name="Cough Syrup", medication_type="liquid")
 
     response = client.get(
-        MEDICATIONS_URL, params={"medication_type": "syrup"}, headers=headers
+        MEDICATIONS_URL, params={"medication_type": "liquid"}, headers=headers
     )
     body = response.json()
 

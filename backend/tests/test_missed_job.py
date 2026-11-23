@@ -39,7 +39,7 @@ def add_medication(client, headers):
     body = {
         "name": "Paracetamol",
         "dosage": "500 mg",
-        "medication_type": "tablet",
+        "medication_type": "pill",
         "start_date": "2026-11-01",
     }
     response = client.post(MEDICATIONS_URL, json=body, headers=headers)
