@@ -1,3 +1,4 @@
+import logging
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
@@ -12,6 +13,9 @@ from app.schemas.caregiver_schema import (
     InvitationResponse,
     PatientResponse,
 )
+from app.services import notification_service
+
+logger = logging.getLogger(__name__)
 
 
 def make_caregiver_response(db: Session, link: CaregiverLink):
@@ -64,7 +68,22 @@ def make_invitation_response(db: Session, link: CaregiverLink):
 
 
 # ---------------- Patient side ----------------
+def send_invitation_push(db: Session, patient: User, link: CaregiverLink):
+    # Only people who already have an account can get a push
+    invitee = caregiver_repository.find_user_by_email(db, link.invited_email)
+    if invitee is None:
+        return
 
+    title = "Caregiver invitation"
+    body = patient.full_name + " invited you to be their caregiver"
+    data = {"type": "caregiver_invitation", "link_id": link.id}
+
+    # A push problem must never stop the invitation
+    try:
+        notification_service.send_push_to_user(db, invitee.id, title, body, data)
+    except Exception:
+        logger.exception("Failed to send invitation push")
+        db.rollback()
 
 def invite_caregiver(db: Session, user: User, data: CaregiverInvite):
     email = data.email.strip().lower()
@@ -106,6 +125,7 @@ def invite_caregiver(db: Session, user: User, data: CaregiverInvite):
     link.receive_missed_alerts = data.receive_missed_alerts
 
     saved = caregiver_repository.save_link(db, link)
+    send_invitation_push(db, user, saved)
     return make_caregiver_response(db, saved)
 
 

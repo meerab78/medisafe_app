@@ -91,3 +91,7 @@ def get_overdue_pending_doses(db: Session, cutoff, limit: int):
     query = query.order_by(DoseLog.scheduled_at)
     query = query.limit(limit)
     return list(db.scalars(query).all())
+
+def get_medication_by_id_any(db: Session, medication_id: int):
+    # Used by the missed-dose job. It does not check the owner.
+    return db.get(Medication, medication_id)

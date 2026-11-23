@@ -62,3 +62,28 @@ def save_link(db: Session, link: CaregiverLink):
 def delete_link(db: Session, link: CaregiverLink):
     db.delete(link)
     db.commit()
+
+def get_accepted_link(db: Session, caregiver_id: int, patient_id: int):
+    # The link must belong to this caregiver, this patient, and be accepted
+    query = select(CaregiverLink).where(
+        CaregiverLink.caregiver_id == caregiver_id,
+        CaregiverLink.patient_id == patient_id,
+        CaregiverLink.status == "accepted",
+    )
+    return db.scalar(query)
+
+
+def get_alert_caregiver_ids(db: Session, patient_id: int):
+    # Accepted caregivers who want missed-dose alerts
+    query = select(CaregiverLink).where(
+        CaregiverLink.patient_id == patient_id,
+        CaregiverLink.status == "accepted",
+        CaregiverLink.receive_missed_alerts.is_(True),
+    )
+    links = list(db.scalars(query).all())
+
+    caregiver_ids = []
+    for link in links:
+        if link.caregiver_id is not None:
+            caregiver_ids.append(link.caregiver_id)
+    return caregiver_ids
