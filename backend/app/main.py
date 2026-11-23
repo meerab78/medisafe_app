@@ -13,6 +13,7 @@ from app.routes import (
     options_routes,
     schedule_routes,
     refill_routes,
+    user_settings_routes,
     user_routes,
 )
 from app.routes import report_routes
@@ -34,7 +35,7 @@ app.include_router(options_routes.router)
 app.include_router(medication_wizard_routes.router)
 app.include_router(appointment_routes.router)
 app.include_router(refill_routes.router)
-
+app.include_router(user_settings_routes.router)
 @app.get("/")
 def health_check():
     return {"success": True, "message": "Medisafe API is running"}
