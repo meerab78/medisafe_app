@@ -39,3 +39,9 @@ def get_medications(
     query = query.order_by(Medication.name)
     result = db.scalars(query).all()
     return list(result)
+
+def add_medication(db: Session, medication: Medication):
+    db.add(medication)
+    # flush gives the medication an id without saving permanently yet
+    db.flush()
+    return medication

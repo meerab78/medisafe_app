@@ -96,8 +96,8 @@ class MedicationCreate(BaseModel):
 
     @model_validator(mode="after")
     def check_rules(self):
-        # End date cannot be before start date
-        if self.end_date is not None:
+               # End date cannot be before start date
+        if self.end_date is not None and self.start_date is not None:
             if self.end_date < self.start_date:
                 raise ValueError("End date cannot be before start date")
 

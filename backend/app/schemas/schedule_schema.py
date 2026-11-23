@@ -4,17 +4,40 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 ALLOWED_SCHEDULE_TYPES = ["daily", "weekly", "interval"]
 
+# A day has 24 hours, so there cannot be more than 24 times
+MAX_TIMES_PER_DAY = 24
+
 
 class ScheduleTimeInput(BaseModel):
     time_of_day: time
     dose_amount: int = Field(default=1, ge=1, le=20)
 
 
+def make_hourly_times(first_time, hours_between):
+    # Example: first time 06:00 and every 8 hours gives 06:00, 14:00, 22:00
+    times = []
+    minutes = first_time.hour * 60 + first_time.minute
+    gap = hours_between * 60
+
+    # Stop when we reach the end of the day
+    while minutes < 24 * 60:
+        hour = minutes // 60
+        minute = minutes % 60
+        item = ScheduleTimeInput(time_of_day=time(hour, minute), dose_amount=1)
+        times.append(item)
+        minutes = minutes + gap
+
+    return times
+
+
 class ScheduleCreate(BaseModel):
     schedule_type: str
     days_of_week: list[int] | None = None
     interval_days: int | None = Field(default=None, ge=1, le=365)
-    times: list[ScheduleTimeInput] = Field(min_length=1, max_length=10)
+    # Send either "times", or "hours_between" together with "first_dose_time"
+    times: list[ScheduleTimeInput] | None = None
+    hours_between: int | None = Field(default=None, ge=1, le=24)
+    first_dose_time: time | None = None
 
     @field_validator("schedule_type")
     @classmethod
@@ -28,13 +51,28 @@ class ScheduleCreate(BaseModel):
 
     @model_validator(mode="after")
     def check_schedule_rules(self):
-        # The same time cannot be added twice
+        # Step 1: decide the times
+        if self.hours_between is not None:
+            if self.times:
+                raise ValueError("Send either times or hours_between, not both")
+            if self.first_dose_time is None:
+                raise ValueError("first_dose_time is required with hours_between")
+            self.times = make_hourly_times(self.first_dose_time, self.hours_between)
+        else:
+            if not self.times:
+                raise ValueError("Add at least one time, or use hours_between")
+
+        if len(self.times) > MAX_TIMES_PER_DAY:
+            raise ValueError("A schedule can have at most 24 times")
+
+        # Step 2: the same time cannot be added twice
         seen_times = []
         for item in self.times:
             if item.time_of_day in seen_times:
                 raise ValueError("The same time cannot be added twice")
             seen_times.append(item.time_of_day)
 
+        # Step 3: rules for each schedule type
         if self.schedule_type == "weekly":
             if not self.days_of_week:
                 raise ValueError(
