@@ -8,6 +8,7 @@ from app.routes import (
     health_routes,
     internal_routes,
     medication_routes,
+    options_routes,
     schedule_routes,
     user_routes,
 )
@@ -26,6 +27,7 @@ app.include_router(dose_routes.router)
 app.include_router(device_routes.router)
 app.include_router(internal_routes.router)
 app.include_router(report_routes.router)
+app.include_router(options_routes.router)
 
 
 @app.get("/")
