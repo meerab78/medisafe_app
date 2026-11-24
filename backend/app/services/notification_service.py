@@ -1,5 +1,5 @@
+import json
 import logging
-
 import firebase_admin
 from firebase_admin import credentials, exceptions, messaging
 from sqlalchemy.orm import Session
@@ -15,7 +15,13 @@ def get_firebase_app():
     try:
         return firebase_admin.get_app()
     except ValueError:
-        cred = credentials.Certificate(settings.firebase_credentials_path)
+        if settings.firebase_credentials_json:
+            # Vercel: the key comes from an environment variable as JSON text
+            key_data = json.loads(settings.firebase_credentials_json)
+            cred = credentials.Certificate(key_data)
+        else:
+            # Laptop: the key comes from a file
+            cred = credentials.Certificate(settings.firebase_credentials_path)
         return firebase_admin.initialize_app(cred)
 
 
