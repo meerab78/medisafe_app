@@ -1,4 +1,22 @@
-*.pyc
-.DS_Store
-
+﻿# Flutter
 .dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+.pub-cache/
+.pub/
+.idea/
+*.iml
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# IDE and OS
+.vscode/
+.DS_Store
+Thumbs.db
